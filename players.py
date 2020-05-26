@@ -1,16 +1,32 @@
 import numpy as np
 
 
+def valid_entry(entry):
+    valid_list = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
+    condition_a = len(entry) == 2
+    condition_b = entry[0] in valid_list
+    condition_c = 1 <= int(entry[1]) <= 10
+
+    if condition_a and condition_b and condition_c:
+        return True
+
+def numeric_entry(entry):
+    dict = {'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6,
+            'H': 7, 'I': 8, 'J': 9}
+    entry = [dict[entry[0]], int(entry[1])]
+    return entry
+
+
 class Players:
     def __init__(self, name):
         self.name = name
         self.gird = np.zeros((10, 10))
         self.non_placed_ships = [
-                                1*['AirCraft Carrier', 5],
-                                1*['BattleShip', 4],
-                                1*['Cruiser', 3],
-                                2*['Destroyer', 2],
-                                2*['Submarines', 1],
+                                 ['AirCraft Carrier', 5],
+                                 ['BattleShip', 4],
+                                 ['Cruiser', 3],
+                                 ['Destroyer', 2],
+                                 ['Submarines', 3],
                                 ]
 
     def player_setup(self):
@@ -35,10 +51,16 @@ class Players:
                               'for the {ship} with a size of {size}: [example '
                               '"A3"]: '
                               .format(ship=ship[0], size=ship[1]))
-            condition_a = len(start_loc) == 2
-            condition_b = start_loc
-            if start_loc
+            start_loc = start_loc.upper()
+            if valid_entry(start_loc):
+                start_loc = numeric_entry(start_loc)
+                valid_start_loc = self.is_free(start_loc)
+
+
         end_loc = find_valid_end_loc(ship, start_loc)
 
     def find_valid_end_loc(self, ship, start_loc):
+        pass
+
+    def is_free(self, start_loc):
         pass
