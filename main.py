@@ -31,6 +31,6 @@ intro_text()
 player_name = input("Please enter your name: ")
 
 
-while game_exit is False:
-
-    game_exit = new_round(player_name)
+if __name__ == '__main__':
+    while game_exit is False:
+        game_exit = new_round(player_name)
