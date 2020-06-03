@@ -1,66 +1,18 @@
 import numpy as np
-
-
-def valid_entry(entry):
-    """
-    Checks if an entry is a valid one.
-    """
-    valid_list = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
-    condition_a = len(entry) == 2
-    condition_b = entry[0] in valid_list
-    condition_c = 1 <= int(entry[1]) <= 10
-
-    if condition_a and condition_b and condition_c:
-        return True
-
-
-def to_alpha_numeric(entry):
-    """
-    Transforms a grid position into a matrix position (IE: A3 --> [0, 3]
-    """
-    grid_dict = {0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E', 5: 'F', 6: 'G',
-            7: 'H', 8: 'I', 9: 'J'}
-    # Columns then rows
-    entry = [grid_dict[entry[1]] + str(entry[0] + 1)]
-    return entry
-
-
-def to_numeric(entry):
-    """
-        Transforms a grid position into a matrix position (IE: A3 --> [0, 3]
-        """
-    grid_dict = {'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6,
-                 'H': 7, 'I': 8, 'J': 9}
-    # Columns then rows
-    entry = [int(entry[1]) - 1, grid_dict[entry[0]]]
-    return entry
-
-
-def select_dict(list):
-    """
-    Takes a list of valid locations and make a dictionary with them so the
-    user can easily select an end location.
-    :param list:
-    :return: dictionary
-    """
-    my_dict_matrix = {}
-    my_dict_print = {}
-    for i in range(len(list)):
-        my_dict_matrix[i + 1] = list[i]
-        my_dict_print[i + 1] = to_alpha_numeric(list[i])
-    return my_dict_matrix, my_dict_print
-
+from static_func import *
+import pandas as pd
 
 class Players:
     def __init__(self, name):
         self.name = name
         self.grid = np.zeros((10, 10))
+        self.grid.round().astype(int)
         self.non_placed_ships = [
                                  ['AirCraft Carrier', 5],
                                  ['BattleShip', 4],
                                  ['Cruiser', 3],
-                                 ['Destroyer', 2],
                                  ['Submarines', 3],
+                                 ['Destroyer', 2]
                                 ]
 
     def player_setup(self):
@@ -75,16 +27,17 @@ class Players:
         the gird
          """
         for ship in self.non_placed_ships:
-            print(self.grid)
-
+            grid = pd.DataFrame(self.grid)
+            print(grid)
             self.place_ship(ship)
+        print("Final Grid is:")
+        print(self.grid)
 
     def place_ship(self, ship):
         """
         Asks the user for an anchor point and an end point for each
         ship that has not been placed.
         """
-
         while True:
             start_loc = input('Please enter the anchor point '
                               'for the {ship} with a size of {size}: [example '
@@ -92,20 +45,24 @@ class Players:
                               .format(ship=ship[0], size=ship[1]))
             start_loc = start_loc.upper()
             if valid_entry(start_loc) is False:
+                print('Invalid entry, please try again!')
                 continue
+
             start_loc = to_numeric(start_loc)
             valid_end_loc = self.is_free(start_loc, ship)
             if valid_end_loc is False:
+                print('Invalid entry, please try again!')
                 continue
+
             valid_end_loc, print_loc = select_dict(valid_end_loc)
             print(print_loc)
-            max = len(valid_end_loc)
-            end_loc = input('Please enter an end point (1-{})'.format(max))
-            if 1 <= int(end_loc) <= 4:
-                end_loc = valid_end_loc[int(end_loc)]
-                self.place_ship_on_grid(start_loc, end_loc)
+            max_end_points = len(valid_end_loc)
+            end_loc = input('Please enter an end point (1-{})'.format(
+                            max_end_points))
+            end_loc = valid_end_entry(end_loc, max_end_points, valid_end_loc)
+            if end_loc[0]:
+                self.place_ship_on_grid(start_loc, end_loc[1])
                 return
-
 
     def find_valid_end_loc(self, start_loc, ship):
         """
@@ -123,7 +80,7 @@ class Players:
         horizontal_right = 0
         valid_end_loc = []
 
-        for i in range(length + 1):
+        for i in range(length):
             if self.valid_loc(start_loc[0] + i, start_loc[1]):
                 vertical_down += 1
                 if vertical_down == length:
@@ -149,8 +106,8 @@ class Players:
     def valid_loc(self, start_loc_y, start_loc_x):
         """
         Check if all the the grid square is inside grid and is not filled.
-        :param start_loc_y
-        :param start_loc_x
+        :param start_loc_y [int]
+        :param start_loc_x [int]
         :return: True/False
         """
         index_min = start_loc_x >= 0 and start_loc_y >= 0
@@ -184,17 +141,20 @@ class Players:
         on the matrix in-place.
         :param start:
         :param end:
-        :return: Nothing
+        :return: N/A
         """
-        vertical = end[0] - start[0]
-        horizontal = end[1] - start[1]
+        vertical = abs(end[0] - start[0])
+        horizontal = abs(end[1] - start[1])
+        step = 1
+        if (end[1] - start[1]) < 0 or (end[0] - start[0]) < 0:
+            step *= -1
 
-        if horizontal:
+        if horizontal > 0:
             fixed_column = start[0]
-            for i in range(start[1], end[1]):
+            for i in range(start[1], end[1] + step, step):
                 self.grid[fixed_column][i] = 1
 
-        if vertical:
+        if vertical > 0:
             fixed_column = start[1]
-            for i in range(start[0], end[0]):
-                self.grid[fixed_column][i] = 1
+            for i in range(start[0], end[0] + step, step):
+                self.grid[i][fixed_column] = 1

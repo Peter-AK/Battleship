@@ -20,7 +20,7 @@ def new_round(name):
 
     # Grid setup for both Player and PC
     player.grid_setup()
-    pc.grid_setup()
+    # pc.grid_setup()
 
     return True
 
