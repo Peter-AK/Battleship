@@ -1,12 +1,11 @@
 import numpy as np
 from static_func import *
-import pandas as pd
 
-class Players:
+
+class Player:
     def __init__(self, name):
         self.name = name
         self.grid = np.zeros((10, 10))
-        self.grid.round().astype(int)
         self.non_placed_ships = [
                                  ['AirCraft Carrier', 5],
                                  ['BattleShip', 4],
@@ -14,12 +13,10 @@ class Players:
                                  ['Submarines', 3],
                                  ['Destroyer', 2]
                                 ]
-
-    def player_setup(self):
-        """
-        General function for the setup phase for each player.
-        """
         self.grid_setup()
+
+    def __call__(self, *args, **kwargs):
+        pass
 
     def grid_setup(self):
         """
@@ -27,11 +24,13 @@ class Players:
         the gird
          """
         for ship in self.non_placed_ships:
-            grid = pd.DataFrame(self.grid)
+            grid = to_dataframe(self.grid)
             print(grid)
             self.place_ship(ship)
+
         print("Final Grid is:")
-        print(self.grid)
+        grid = to_dataframe(self.grid)
+        print(grid)
 
     def place_ship(self, ship):
         """

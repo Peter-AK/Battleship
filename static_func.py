@@ -1,7 +1,17 @@
+import pandas as pd
+
+
 def intro_text():
     print("Welcome To the classic game of battleship!")
     print("By Peter Agalakov")
     print('v0.1')
+
+
+def to_dataframe(grid):
+    col = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
+    row = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+    grid = pd.DataFrame(grid, row, columns=col, dtype="Int64")
+    return grid
 
 
 def valid_entry(entry):
@@ -13,13 +23,15 @@ def valid_entry(entry):
     if len(entry) == 2:
         try:
             condition_b = 1 <= int(entry[1]) <= 10
-        except ValueError:
+        except ValueError as e:
+            print(e)
             return False
 
     elif len(entry) == 3:
         try:
             condition_b = int(entry[1]) == 1 and int(entry[2]) == 0
-        except ValueError:
+        except ValueError as e:
+            print(e)
             return False
     else:
         return False
@@ -39,8 +51,8 @@ def valid_end_entry(end_loc, max_end_points, valid_end_loc):
             else:
                 print('Invalid entry, please try again!')
                 return [False]
-        except ValueError:
-            print('Invalid entry, please try again!')
+        except ValueError as e:
+            print(e)
             return [False]
 
 
@@ -75,7 +87,7 @@ def select_dict(a_list):
     Takes a list of valid locations and make a dictionary with them so the
     user can easily select an end location.
     :param a_list:
-    :return: dictionary
+    :return: {dict}
     """
     my_dict_matrix = {}
     my_dict_print = {}

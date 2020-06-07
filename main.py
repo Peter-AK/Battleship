@@ -8,20 +8,17 @@ v0.1:
     initial backend build
 
 """
-from players import Players
+from players import Player
+from pc import Pc
 from static_func import intro_text
 
 
 def new_round(name):
     """New round function that generates a new game."""
     # Player and PC class creation
-    player = Players(name)
-    pc = Players('PC')
-
-    # Grid setup for both Player and PC
-    player.grid_setup()
-    # pc.grid_setup()
-
+    player = Player(name)
+    pc = Pc('PC')
+    player()
     return True
 
 
