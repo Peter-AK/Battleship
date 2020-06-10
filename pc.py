@@ -25,5 +25,6 @@ class Pc(Player):
             end_loc = random.randint(1, max_end_points)
             end_loc = valid_end_entry(end_loc, max_end_points, valid_end_loc)
             if end_loc[0]:
-                self.place_ship_on_grid(start_loc, end_loc[1])
+                place_ship_on_grid(ship, start_loc, end_loc[1])
+                ship.in_place(self.grid)
                 return

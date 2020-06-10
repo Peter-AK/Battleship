@@ -95,3 +95,34 @@ def select_dict(a_list):
         my_dict_matrix[i + 1] = a_list[i]
         my_dict_print[i + 1] = to_alpha_numeric(a_list[i])
     return my_dict_matrix, my_dict_print
+
+
+def place_ship_on_grid(ship, start, end):
+    """
+    Once a start location and an end location was selected, do the
+    actual placement on the players grid. Changes the state from 0 to 1
+    on the matrix in-place.
+    :param ship: object
+    :param start: list []
+    :param end: list []
+    :return: In-place
+    """
+    if start == end:
+        ship.location = [[start[0], start[1], 1]]
+        return
+
+    vertical = abs(end[0] - start[0])
+    horizontal = abs(end[1] - start[1])
+    step = 1
+    if (end[1] - start[1]) < 0 or (end[0] - start[0]) < 0:
+        step *= -1
+
+    if horizontal > 0:
+        fixed_column = start[0]
+        for i in range(start[1], end[1] + step, step):
+            ship.location += [[fixed_column, i, 1]]
+
+    if vertical > 0:
+        fixed_column = start[1]
+        for i in range(start[0], end[0] + step, step):
+            ship.location += [[i, fixed_column, 1]]

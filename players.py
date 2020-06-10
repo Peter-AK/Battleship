@@ -1,29 +1,54 @@
 import numpy as np
 from static_func import *
+from ships import Ship
 
 
 class Player:
     def __init__(self, name):
         self.name = name
         self.grid = np.zeros((10, 10))
+        self.enemy_gird = np.zeros((10, 10))
         self.non_placed_ships = [
                                  ['AirCraft Carrier', 5],
                                  ['BattleShip', 4],
                                  ['Cruiser', 3],
-                                 ['Submarines', 3],
-                                 ['Destroyer', 2]
+                                 ['Destroyer-A', 2],
+                                 ['Destroyer-B', 2],
+                                 ['Submarine-A', 1],
+                                 ['Submarines-B', 1]
                                 ]
+        self.my_ships = [Ship(ship[0], ship[1]) for ship in
+                         self.non_placed_ships]
         self.grid_setup()
 
-    def __call__(self, *args, **kwargs):
-        pass
+    # def __call__(self, pc, *args, **kwargs):
+    #     """
+    #     When the player object is called up, it will preform a turn.
+    #     :param args:
+    #     :param kwargs:
+    #     :return: in-place
+    #     """
+    #     salvo = len(self.ships_alive)
+    #     while salvo > 0:
+    #         print('You have {} salvos Left!'.format(salvo))
+    #         hit_loc = input('Please select a enemy gird square you would like '
+    #                      'to hit? (example "H2") :')
+    #         hit_loc = hit_loc.upper()
+    #         if valid_entry(hit_loc) is False:
+    #             continue
+    #         hit_loc = to_numeric(hit_loc)
+    #         if pc.grid[hit_loc[0]][hit_loc[1]] == 1:
+    #             print('HIT!!')
+    #         elif pc.grid[hit_loc[0]][hit_loc[1]] == 0:
+    #             print('MISS!!')
+    #     return
 
     def grid_setup(self):
         """
         Prints out the grid for a visual queue, places all the ships on
         the gird
          """
-        for ship in self.non_placed_ships:
+        for ship in self.my_ships:
             grid = to_dataframe(self.grid)
             print(grid)
             self.place_ship(ship)
@@ -39,9 +64,9 @@ class Player:
         """
         while True:
             start_loc = input('Please enter the anchor point '
-                              'for the {ship} with a size of {size}: [example '
-                              '"A3"]: '
-                              .format(ship=ship[0], size=ship[1]))
+                              'for the \n {name} with a size of {size}: ['
+                              'example "A3"]: '
+                              .format(name=ship.name, size=ship.size))
             start_loc = start_loc.upper()
             if valid_entry(start_loc) is False:
                 print('Invalid entry, please try again!')
@@ -60,7 +85,8 @@ class Player:
                             max_end_points))
             end_loc = valid_end_entry(end_loc, max_end_points, valid_end_loc)
             if end_loc[0]:
-                self.place_ship_on_grid(start_loc, end_loc[1])
+                place_ship_on_grid(ship, start_loc, end_loc[1])
+                ship.in_place(self.grid)
                 return
 
     def find_valid_end_loc(self, start_loc, ship):
@@ -71,7 +97,9 @@ class Player:
         outside the gird range or there is another ship in on a grid square
         then the end location is not valid. Returns list of valid locations.
         """
-        length = ship[1]
+        length = ship.size
+        if length == 1:
+            return [start_loc]
 
         vertical_down = 0
         vertical_up = 0
@@ -132,28 +160,3 @@ class Player:
                 return False
         else:
             return False
-
-    def place_ship_on_grid(self, start, end):
-        """
-        Once a start location and an end location was selected, do the
-        actual placement on the players grid. Changes the state from 0 to 1
-        on the matrix in-place.
-        :param start:
-        :param end:
-        :return: N/A
-        """
-        vertical = abs(end[0] - start[0])
-        horizontal = abs(end[1] - start[1])
-        step = 1
-        if (end[1] - start[1]) < 0 or (end[0] - start[0]) < 0:
-            step *= -1
-
-        if horizontal > 0:
-            fixed_column = start[0]
-            for i in range(start[1], end[1] + step, step):
-                self.grid[fixed_column][i] = 1
-
-        if vertical > 0:
-            fixed_column = start[1]
-            for i in range(start[0], end[0] + step, step):
-                self.grid[i][fixed_column] = 1

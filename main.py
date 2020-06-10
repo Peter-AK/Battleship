@@ -11,6 +11,7 @@ v0.1:
 from players import Player
 from pc import Pc
 from static_func import intro_text
+import random
 
 
 def new_round(name):
@@ -18,8 +19,20 @@ def new_round(name):
     # Player and PC class creation
     player = Player(name)
     pc = Pc('PC')
-    player()
-    return True
+    who_starts = random.randint(1, 2)
+    victory = False
+
+    while victory is False:
+        if who_starts == 1:
+            victory = player(pc)
+            who_starts += 1
+
+        elif who_starts == 2:
+            victory = pc(player)
+            who_starts -= 1
+
+        elif who_starts == 'exit':
+            return True
 
 
 # Sets exit trigger to False, when True game will exit.
