@@ -10,7 +10,7 @@ v0.1:
 """
 from players import Player
 from pc import Pc
-from static_func import intro_text
+from main_gui import *
 import random
 
 
@@ -35,12 +35,10 @@ def new_round(name):
             return True
 
 
-# Sets exit trigger to False, when True game will exit.
-game_exit = False
-intro_text()
-player_name = input("Please enter your name: ")
-
-
 if __name__ == '__main__':
+    # main()  // Debugging skip
+    game_exit = False
+    intro_text()
+    # player_name = input("Please enter your name: ") // Debugging skip
     while game_exit is False:
-        game_exit = new_round(player_name)
+        game_exit = new_round('player_name')

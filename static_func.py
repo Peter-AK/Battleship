@@ -57,8 +57,11 @@ def valid_end_entry(end_loc, max_end_points, valid_end_loc):
 
 
 def to_alpha_numeric(entry):
+
     """
-    Transforms a grid position into a matrix position (IE: A3 --> [0, 3]
+    Transforms a grid position into a matrix position.
+    :param entry: [3, 2]
+    :return: ["C3"]
     """
     grid_dict = {0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E', 5: 'F', 6: 'G',
             7: 'H', 8: 'I', 9: 'J'}
@@ -69,7 +72,9 @@ def to_alpha_numeric(entry):
 
 def to_numeric(entry):
     """
-    Transforms a grid position into a matrix position (IE: A3 --> [0, 3]
+    Transforms a grid position into a matrix position
+    :param entry: ["A3"]
+    :return: [2, 0]
     """
     grid_dict = {'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6,
                  'H': 7, 'I': 8, 'J': 9}
@@ -126,3 +131,42 @@ def place_ship_on_grid(ship, start, end):
         fixed_column = start[1]
         for i in range(start[0], end[0] + step, step):
             ship.location += [[i, fixed_column, 1]]
+
+
+def get_salvo(ship_objects):
+    """
+    Receives a list of ship object, counts how may ships are alive and return
+    its equivalent value in salvos.
+    :param [ship_objects,..]
+    :return: int
+    """
+    salvo = 0
+    for i in ship_objects:
+        if i.alive is True:
+            salvo += 1
+    return salvo
+
+
+def make_hit_list(salvo):
+    """
+    Receives a number of salvos that can be fired and asks the user to
+    select locations.
+    :param salvo:
+    :return:
+    """
+    hit_list = []
+    print_list = []
+    while salvo > 0:
+        print('You have {} salvos Left!'.format(salvo))
+        hit_loc = input('Please select a enemy gird square you '
+                        'would like to hit? (example "H2") :')
+        hit_loc = hit_loc.upper()
+        if valid_entry(hit_loc) is False:
+            continue
+        if hit_loc in print_list:
+            continue
+        print_list.append(hit_loc)
+        hit_loc = to_numeric(hit_loc)
+        hit_list.append(hit_loc)
+        salvo -= 1
+    return hit_list, print_list
