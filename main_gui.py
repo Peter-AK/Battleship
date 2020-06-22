@@ -67,19 +67,21 @@ class Window(QWidget):
         self.move(800, 300)
         self.setWindowTitle("BattleShip!")
         self.show()
-        new_round('Player')
+
 
     def grid_space_selected(self, gid):
 
         if gid.isChecked():
             self.selected_sum += 1
             print(self.selected_sum)
+            self.selected_locations.append(gid.id)
         elif gid.isChecked() is False:
             self.selected_sum -= 1
             print(self.selected_sum)
 
     def fire_button_action(self):
         if self.selected_sum < 7:
+            print(self.selected_locations)
             # for button in enumerate(self.pc_group.buttons()):
             #     if button.isChecked():
             #         print(list(button))
