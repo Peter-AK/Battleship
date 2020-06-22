@@ -14,31 +14,53 @@ from main_gui import *
 import random
 
 
+def check_victory(player_object):
+    health = 0
+    for i in player_object.my_ships:
+        for j in i.location:
+            health += j[2]
+
+    if health == 0:
+        return True
+    else:
+        return False
+
+
 def new_round(name):
     """New round function that generates a new game."""
     # Player and PC class creation
     player = Player(name)
     pc = Pc('PC')
+    # Random int to see who starts
     who_starts = random.randint(1, 2)
-    victory = False
+    if who_starts == 1:
+        print('Player starts!!')
 
+    # Victory flag set to False
+    victory = False
     while victory is False:
         if who_starts == 1:
-            victory = player(pc)
+            player(pc)
             who_starts += 1
+            if check_victory(pc):
+                victory = True
+                print('Player WINS!!!')
 
         elif who_starts == 2:
-            victory = pc(player)
+            pc(player)
             who_starts -= 1
+            if check_victory(pc):
+                victory = True
+                print('PC WINS!!!')
 
         elif who_starts == 'exit':
             return True
 
 
 if __name__ == '__main__':
-    # main()  // Debugging skip
+    main()  # // Debugging skip
     game_exit = False
     intro_text()
-    # player_name = input("Please enter your name: ") // Debugging skip
     while game_exit is False:
-        game_exit = new_round('player_name')
+        game_exit = new_round('player')
+

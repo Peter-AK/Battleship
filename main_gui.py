@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QGridLayout,
     QPushButton, QButtonGroup)
 from PyQt5.QtCore import Qt
 from static_func import *
-
+from main import new_round
 
 def add_buttons(grid, ischeckable, group):
     positions = [[i, j] for i in range(10) for j in range(10)]
@@ -22,6 +22,8 @@ def add_buttons(grid, ischeckable, group):
 class Window(QWidget):
     def __init__(self):
         super().__init__()
+        self.selected_locations = []
+        self.selected_sum = 0
         main_layout = QGridLayout()
 
         # Player's gird
@@ -42,10 +44,17 @@ class Window(QWidget):
         player_label.setText('Player: <Name>')
         player_label.setAlignment(Qt.AlignCenter)
 
-        player_group = QButtonGroup(self)
-        pc_group = QButtonGroup(self)
-        add_buttons(player_layout, False, player_group)
-        add_buttons(pc_layout, True, pc_group)
+        # Fire button
+        self.fire_button = QPushButton('Fire the Missiles')
+
+        # Logic
+        self.player_group = QButtonGroup(self)
+        self.pc_group = QButtonGroup(self)
+        add_buttons(player_layout, False, self.player_group)
+        add_buttons(pc_layout, True, self.pc_group)
+        self.pc_group.setExclusive(False)
+        self.pc_group.buttonClicked.connect(self.grid_space_selected)
+        self.fire_button.clicked.connect(self.fire_button_action)
 
         self.setLayout(main_layout)
 
@@ -53,11 +62,35 @@ class Window(QWidget):
         main_layout.addWidget(pc_widget, 1, 0)
         main_layout.addWidget(player_label, 2, 0)
         main_layout.addWidget(player_widget, 3, 0)
+        main_layout.addWidget(self.fire_button, 0, 2)
 
         self.move(800, 300)
         self.setWindowTitle("BattleShip!")
         self.show()
+        new_round('Player')
 
+    def grid_space_selected(self, gid):
+
+        if gid.isChecked():
+            self.selected_sum += 1
+            print(self.selected_sum)
+        elif gid.isChecked() is False:
+            self.selected_sum -= 1
+            print(self.selected_sum)
+
+    def fire_button_action(self):
+        if self.selected_sum < 7:
+            # for button in enumerate(self.pc_group.buttons()):
+            #     if button.isChecked():
+            #         print(list(button))
+            print([i for i, button in
+                   enumerate(self.pc_group.buttons()) if
+                   button.isChecked()])
+        else:
+            print('Too many are selected')
+
+    def update_button_value(self, button_group):
+        pass
 
 def main():
     app = QApplication(sys.argv)

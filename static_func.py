@@ -147,26 +147,3 @@ def get_salvo(ship_objects):
     return salvo
 
 
-def make_hit_list(salvo):
-    """
-    Receives a number of salvos that can be fired and asks the user to
-    select locations.
-    :param salvo:
-    :return:
-    """
-    hit_list = []
-    print_list = []
-    while salvo > 0:
-        print('You have {} salvos Left!'.format(salvo))
-        hit_loc = input('Please select a enemy gird square you '
-                        'would like to hit? (example "H2") :')
-        hit_loc = hit_loc.upper()
-        if valid_entry(hit_loc) is False:
-            continue
-        if hit_loc in print_list:
-            continue
-        print_list.append(hit_loc)
-        hit_loc = to_numeric(hit_loc)
-        hit_list.append(hit_loc)
-        salvo -= 1
-    return hit_list, print_list
