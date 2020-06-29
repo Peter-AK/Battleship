@@ -58,7 +58,6 @@ def new_round(name):
 
 
 if __name__ == '__main__':
-    main()  # // Debugging skip
     game_exit = False
     intro_text()
     while game_exit is False:

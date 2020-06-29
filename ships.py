@@ -1,6 +1,7 @@
 class Ship:
-    def __init__(self, name, size):
+    def __init__(self, name, size, ship_id):
         self.name = name
+        self.id = ship_id
         self.size = size
         self.location = []
         self.alive = True

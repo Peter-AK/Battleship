@@ -18,7 +18,7 @@ class Pc(Player):
                 self.fire_salvo(hit_loc_in_list, player)
             return
 
-    def place_ship(self, ship):
+    def set_anchor(self, ship):
         """
         Asks the user for an anchor point and an end point for each
         ship that has not been placed.

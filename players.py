@@ -10,59 +10,64 @@ class Player:
         self.grid = np.full((10, 10), 555)
         self.tracking_grid = np.full((10, 10), 555)
         self.non_placed_ships = [
-            ['AirCraft Carrier', 5],
-            ['BattleShip', 4],
-            # ['Cruiser', 3],
-            # ['Destroyer-A', 2],
-            # ['Destroyer-B', 2],
-            # ['Submarine-A', 1],
-            # ['Submarines-B', 1]
+            ['AirCraft Carrier', 5, 1],
+            ['BattleShip', 4, 2],
+            ['Cruiser', 3, 3],
+            ['Destroyer-A', 2, 4],
+            ['Destroyer-B', 2, 5],
+            ['Submarine-A', 1, 6],
+            ['Submarines-B', 1, 7]
         ]
-        self.my_ships = [Ship(ship[0], ship[1]) for ship in
+        self.my_ships = [Ship(ship[0], ship[1], ship[2]) for ship in
                          self.non_placed_ships]
-        # self.grid_setup()
 
-    def grid_setup(self):
-        """
-        Prints out the grid for a visual queue, places all the ships on
-        the gird
-         """
-        for ship in self.my_ships:
-            grid = to_dataframe(self.grid)
-            print(grid)
-            self.place_ship(ship)
+    # def grid_setup(self):
+    #     """
+    #     Prints out the grid for a visual queue, places all the ships on
+    #     the gird
+    #      """
+    #     for ship in self.my_ships:
+    #         grid = to_dataframe(self.grid)
+    #         print(grid)
+    #         self.place_ship(ship)
 
-    def place_ship(self, ship):
+    def get_ship_by_id(self, ship_id):
+        for i in self.my_ships:
+            if ship_id == i.id:
+                return i
+
+        return -1
+
+    def set_anchor(self, ship, start_loc):
         """
         Asks the user for an anchor point and an end point for each
         ship that has not been placed.
         """
-        while True:
-            start_loc = input('Please enter the anchor point '
-                              'for the \n {name} with a size of {size}: ['
-                              'example "A3"]: '
-                              .format(name=ship.name, size=ship.size))
-            start_loc = start_loc.upper()
-            if valid_entry(start_loc) is False:
-                print('Invalid entry, please try again!')
-                continue
 
-            start_loc = to_numeric(start_loc)
-            valid_end_loc = self.is_free(start_loc, ship)
-            if valid_end_loc is False:
-                print('Invalid entry, please try again!')
-                continue
+        valid_end_loc = self.is_free(start_loc, ship)
 
-            valid_end_loc, print_loc = select_dict(valid_end_loc)
-            print(print_loc)
-            max_end_points = len(valid_end_loc)
-            end_loc = input('Please enter an end point (1-{})'.format(
-                max_end_points))
-            end_loc = valid_end_entry(end_loc, max_end_points, valid_end_loc)
-            if end_loc[0]:
-                place_ship_on_grid(ship, start_loc, end_loc[1])
-                ship.in_place(self.grid)
-                return
+        valid_end_loc, print_loc = select_dict(valid_end_loc)
+        return valid_end_loc, print_loc
+
+    def place_ship(self, ship, start_loc, end_loc):
+
+        place_ship_on_grid(ship, start_loc, end_loc)
+        ship.in_place(self.grid)
+
+    def is_free(self, start_loc, ship):
+        """
+        Check if the Anchor point is free(first IF) AND at lest 1 end
+        location is possible(2nd IF).
+        """
+        if self.grid[start_loc[0], start_loc[1]] == 555:
+            end_loc = self.find_valid_end_loc(start_loc, ship)
+
+            if len(end_loc) >= 1:
+                return end_loc
+            else:
+                return False
+        else:
+            return False
 
     def find_valid_end_loc(self, start_loc, ship):
         """
@@ -121,20 +126,7 @@ class Player:
         else:
             return False
 
-    def is_free(self, start_loc, ship):
-        """
-        Check if the Anchor point is free(first IF) AND at lest 1 end
-        location is possible(2nd IF).
-        """
-        if self.grid[start_loc[0], start_loc[1]] == 555:
-            end_loc = self.find_valid_end_loc(start_loc, ship)
 
-            if len(end_loc) >= 1:
-                return end_loc
-            else:
-                return False
-        else:
-            return False
 
     # def __call__(self, pc, *args, **kwargs):
     #     """

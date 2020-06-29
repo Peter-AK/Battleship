@@ -94,12 +94,11 @@ def select_dict(a_list):
     :param a_list:
     :return: {dict}
     """
-    my_dict_matrix = {}
-    my_dict_print = {}
-    for i in range(len(a_list)):
-        my_dict_matrix[i + 1] = a_list[i]
-        my_dict_print[i + 1] = to_alpha_numeric(a_list[i])
-    return my_dict_matrix, my_dict_print
+
+    my_dict_print = []
+    for i in a_list:
+        my_dict_print += to_alpha_numeric(i)
+    return a_list, my_dict_print
 
 
 def place_ship_on_grid(ship, start, end):
