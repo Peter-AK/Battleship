@@ -55,7 +55,7 @@ class SplashScreen(qtw.QWidget):
         global setup
         setup = Setup()
         setup.show()
-        self.close()
+        self.hide()
 
     def center(self):
         qr = self.frameGeometry()
@@ -103,6 +103,19 @@ class Combat(qtw.QWidget):
         self.pc_tracking_grid.setExclusive(False)
         self.pc_tracking_grid.buttonClicked.connect(self.grid_space_selected)
         self.fire_button.clicked.connect(self.fire_button_action)
+
+        # Messages
+        self.win_msg = qtw.QMessageBox()
+        self.win_msg.setText('You Win! :)')
+        self.win_msg.setIcon(qtw.QMessageBox.Information)
+
+        self.lose_msg = qtw.QMessageBox()
+        self.lose_msg.setText('You Lose! :(')
+        self.lose_msg.setIcon(qtw.QMessageBox.Information)
+
+        self.too_many_selected_msg = qtw.QMessageBox()
+        self.too_many_selected_msg.setText('Too many locations selected')
+        self.too_many_selected_msg.setIcon(qtw.QMessageBox.Critical)
 
         # Layout
         # Player's widget space
@@ -165,8 +178,10 @@ class Combat(qtw.QWidget):
                 loc = gid_to_grid(i)
                 fire_salvo(self.pc, loc, self.setup_obj.player)
 
+            self.check_winner()
             self.pc.is_alive()
             self.play_a_turn()
+            self.check_winner()
             self.setup_obj.player.is_alive()
             self.selected_locations = []
             self.update_combat_interface()
@@ -174,7 +189,7 @@ class Combat(qtw.QWidget):
             self.salvo_lcd.display(str(self.selected_limit))
 
         else:
-            print('Too many locations are selected')
+            self.too_many_selected_msg.exec()
 
     def paintEvent(self, event):
         qp = qtg.QPainter()
@@ -226,6 +241,17 @@ class Combat(qtw.QWidget):
         update_interface_gird_values_combat(self.pc_tracking_grid,
                                         self.setup_obj.player.tracking_grid)
 
+    def check_winner(self):
+        if self.setup_obj.player.get_salvo_limit() == 0:
+            self.lose_msg.exec()
+            splash.show()
+            self.close()
+
+        elif self.pc.get_salvo_limit() == 0:
+            self.win_msg.exec()
+            splash.show()
+            self.close()
+
 
 class Setup(qtw.QWidget):
     def __init__(self):
@@ -254,7 +280,7 @@ class Setup(qtw.QWidget):
         self.console_label.setAlignment(qtc.Qt.AlignCenter)
         self.console_label.setFont(qtg.QFont('monospace [Consolas]', 14))
 
-        # BattleShip button
+        # BattleShip radio buttons
         self.player_group = qtw.QButtonGroup()
         add_buttons(self.player_layout, False, self.player_group)
 
@@ -268,6 +294,7 @@ class Setup(qtw.QWidget):
         self.ship_layout = qtw.QVBoxLayout()
         self.ship_button_group = qtw.QButtonGroup()
         add_ship_buttons(self, self.player)
+        self.ship_button_group.buttonClicked.connect(self.clear_anchor)
 
         # Reset button
         self.reset = qtw.QPushButton('Reset placement')
@@ -377,6 +404,11 @@ class Setup(qtw.QWidget):
         self.console_label.setStyleSheet("background-color: #00ffa5")
         update_interface_gird_values_setup(self, self.player.grid, True)
 
+    def clear_anchor(self):
+        self.anchor_point = []
+        self.end_loc = []
+        self.update()
+
     def paintEvent(self, event):
         qp = qtg.QPainter()
         qp.begin(self)
@@ -432,6 +464,7 @@ class Setup(qtw.QWidget):
         cp = qtw.QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
+
 
 
 if __name__ == '__main__':

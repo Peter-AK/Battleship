@@ -18,15 +18,15 @@ def update_interface_gird_values_combat(group, grid):
             str(grid[y][x]))
 
         group.button(button_id).setCheckable(False)
-        if grid[y][x] == 1:
-            group.button(button_id).setStyleSheet(
-                "background-color: #808080")
-        elif grid[y][x] == 0:
+
+        if grid[y][x] == 0:
             group.button(button_id).setStyleSheet(
                 "background-color: red")
+            group.button(button_id).setEnabled(False)
         elif grid[y][x] == 7:
             group.button(button_id).setStyleSheet(
                 "background-color: #e6ae17")
+            group.button(button_id).setEnabled(False)
         elif grid[y][x] == 555:
             group.button(button_id).setCheckable(True)
 
