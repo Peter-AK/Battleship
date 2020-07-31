@@ -1,7 +1,6 @@
 import numpy as np
 from static_func import *
 from ships import Ship
-import os
 
 
 class Player:
@@ -21,16 +20,6 @@ class Player:
         self.my_ships = [Ship(ship[0], ship[1], ship[2]) for ship in
                          self.non_placed_ships]
 
-    # def grid_setup(self):
-    #     """
-    #     Prints out the grid for a visual queue, places all the ships on
-    #     the gird
-    #      """
-    #     for ship in self.my_ships:
-    #         grid = to_dataframe(self.grid)
-    #         print(grid)
-    #         self.place_ship(ship)
-
     def get_ship_by_id(self, ship_id):
         for i in self.my_ships:
             if ship_id == i.id:
@@ -43,14 +32,11 @@ class Player:
         Asks the user for an anchor point and an end point for each
         ship that has not been placed.
         """
-
         valid_end_loc = self.is_free(start_loc, ship)
-
         valid_end_loc, print_loc = select_dict(valid_end_loc)
         return valid_end_loc, print_loc
 
     def place_ship(self, ship, start_loc, end_loc):
-
         place_ship_on_grid(ship, start_loc, end_loc)
         ship.in_place(self.grid)
 
@@ -126,94 +112,20 @@ class Player:
         else:
             return False
 
+    def get_salvo_limit(self):
+        total = 0
+        for i in self.my_ships:
+            if i.alive is True:
+                total += 1
 
+        return total
 
-    # def __call__(self, pc, *args, **kwargs):
-    #     """
-    #     When the player object is called up, it will preform a turn.
-    #     :param args:
-    #     :param kwargs:
-    #     :return: in-place
-    #     """
-    #     self.print_turn()
-    #     salvo = get_salvo(self.my_ships)
-    #     while True:
-    #         hit_list, print_list = self.make_hit_list(salvo)
-    #         print(print_list)
-    #         confirm_shooting = input('Is this correct (Y/N) ?').lower()
-    #         if confirm_shooting == "y":
-    #             for hit_loc_in_list in hit_list:
-    #                 self.fire_salvo(hit_loc_in_list, pc)
-    #             return
-    #         else:
-    #             continue
-
-    def fire_salvo(self, location, player):
-        """
-        Fires a single salvo, checks if it was a hit or miss. Makes the
-        modifications necessary in both player and pc gird.
-        :param location: [y, x] coordinates of the salvo location.
-        :param player: player object to get grid info.
-        :return: modify in-place.
-        """
-        y = location[0]
-        x = location[1]
-        if player.grid[y, x] == 1:
-            if self.name != 'PC':
-                print('Hit!!')
-            self.tracking_grid[y, x] = 0
-            for i in player.my_ships:
-                for j in i.location:
-                    if j[0] == y and j[1] == x:
-                        j[2] = 0
-                        i.in_place(player.grid)
-
-        else:
-            self.tracking_grid[location[0]][location[1]] = 7
-            player.grid[location[0]][location[1]] = 7
-            if self.name != 'PC':
-                print('Miss!!')
-
-    def print_turn(self):
-        clear = lambda: os.system('cls')  # on Windows System
-        clear()
-        print('```````````````````````````````````````')
-        print('Tracking Grid')
-        print(to_dataframe(self.tracking_grid))
-        print('```````````````````````````````````````')
-        print('Player Grid')
-        print(to_dataframe(self.grid))
-        print('```````````````````````````````````````')
-
-    def make_hit_list(self, salvo):
-        """
-        Receives a number of salvos that can be fired and asks the user to
-        select locations.
-        :param salvo:
-        :return:
-        """
-        hit_list = []
-        print_list = []
-
-        while salvo > 0:
-            print('You have {} salvos Left!'.format(salvo))
-            hit_loc = input('Please select a enemy gird square you '
-                            'would like to hit? (example "H2") :')
-            hit_loc = hit_loc.upper()
-            if valid_entry(hit_loc) is False:
-                print('Invalid Entry')
-                continue
-            if [hit_loc] in print_list:
-                print('Hit location already in list')
-                continue
-            hit_loc = to_numeric(hit_loc)
-            condition_a = self.tracking_grid[hit_loc[0], hit_loc[1]] == 7
-            condition_b = self.tracking_grid[hit_loc[0], hit_loc[1]] == 0
-            if condition_a or condition_b:
-                print('This gird space has been hit already!')
-                continue
-            print_list.append(to_alpha_numeric(hit_loc))
-
-            hit_list.append(hit_loc)
-            salvo -= 1
-        return hit_list, print_list
+    def is_alive(self):
+        total = 0
+        for i in self.my_ships:
+            for j in i.location:
+                total += j[2]
+            if total == 0:
+                i.alive = False
+            else:
+                total = 0

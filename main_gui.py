@@ -1,6 +1,8 @@
 import sys
 from players import Player
+from pc import Pc
 from static_gui_funcs import *
+import random
 
 
 class SplashScreen(qtw.QWidget):
@@ -66,11 +68,11 @@ class Combat(qtw.QWidget):
     def __init__(self, obj):
         super().__init__()
         self.selected_locations = []
-        self.selected_limit = 7
-        self.max_limit = 7
         self.combat_layout = qtw.QGridLayout()
         self.setLayout(self.combat_layout)
         self.setup_obj = obj
+        self.pc = Pc('Pc')
+        self.selected_limit = self.setup_obj.player.get_salvo_limit()
 
         # Enemy gird
         self.pc_widget = qtw.QWidget()
@@ -85,19 +87,21 @@ class Combat(qtw.QWidget):
 
         # Fire button
         self.fire_button = qtw.QPushButton('Fire the Missiles')
+        self.fire_button.setFixedHeight(60)
 
         # LCD num
         self.salvo_label = qtw.QLabel('Available salvos:')
         self.salvo_lcd = qtw.QLCDNumber()
+        self.salvo_lcd.display(str(self.selected_limit))
 
         #  Logic
         self.pc_group_widget = qtw.QWidget()
         self.pc_group_layout = qtw.QGridLayout()
         self.pc_group_widget.setLayout(self.pc_group_layout)
-        self.pc_group = qtw.QButtonGroup(self)
-        add_buttons(self.pc_group_layout, True, self.pc_group)
-        self.pc_group.setExclusive(False)
-        self.pc_group.buttonClicked.connect(self.grid_space_selected)
+        self.pc_tracking_grid = qtw.QButtonGroup(self)
+        add_buttons(self.pc_group_layout, True, self.pc_tracking_grid)
+        self.pc_tracking_grid.setExclusive(False)
+        self.pc_tracking_grid.buttonClicked.connect(self.grid_space_selected)
         self.fire_button.clicked.connect(self.fire_button_action)
 
         # Layout
@@ -120,17 +124,27 @@ class Combat(qtw.QWidget):
         # Controls layout
         self.controls_widget = qtw.QWidget()
         self.controls_layout = qtw.QVBoxLayout()
+        self.controls_layout.addSpacing(100)
         self.controls_widget.setLayout(self.controls_layout)
         self.controls_layout.addWidget(self.fire_button)
         self.controls_layout.addWidget(self.salvo_label)
         self.controls_layout.addWidget(self.salvo_lcd)
-
 
         # Adding all Widgets to main grid layout
         self.combat_layout.addWidget(self.player_widget, 0, 1)
         self.combat_layout.addWidget(self.pc_widget, 0, 2)
         self.combat_layout.addWidget(self.controls_widget, 0, 3)
         self.combat_layout.addWidget(self.setup_obj.console_label, 1, 1, 1, 2)
+
+        # Logic
+        self.setup_to_combat()
+
+        self.who_starts = random.randint(1, 2)
+        if self.who_starts == 2:
+            print('PC goes first')
+            self.play_a_turn()
+
+        self.update_combat_interface()
 
         self.move(200, 200)
         self.setWindowTitle("BattleShip!")
@@ -139,37 +153,28 @@ class Combat(qtw.QWidget):
         if gid.isChecked():
             self.selected_limit -= 1
             self.salvo_lcd.display(str(self.selected_limit))
-            self.selected_locations.append(self.pc_group.id(gid))
+            self.selected_locations.append(self.pc_tracking_grid.id(gid))
         elif gid.isChecked() is False:
             self.selected_limit += 1
-            self.selected_locations.remove(self.pc_group.id(gid))
+            self.selected_locations.remove(self.pc_tracking_grid.id(gid))
             self.salvo_lcd.display(str(self.selected_limit))
 
     def fire_button_action(self):
         if self.selected_limit >= 0:
-            print(self.selected_locations)
+            for i in self.selected_locations:
+                loc = gid_to_grid(i)
+                fire_salvo(self.pc, loc, self.setup_obj.player)
+
+            self.pc.is_alive()
+            self.play_a_turn()
+            self.setup_obj.player.is_alive()
+            self.selected_locations = []
+            self.update_combat_interface()
+            self.selected_limit = self.setup_obj.player.get_salvo_limit()
+            self.salvo_lcd.display(str(self.selected_limit))
+
         else:
             print('Too many locations are selected')
-
-    def update_player_button_value(self):
-        for y in range(0, 10, 1):
-            for x in range(0, 10, 1):
-                gid = 100 + (y * 10) + x
-                self.player_group.button(gid).setText(
-                    str(self.test_value[y][x]))
-
-    def update_pc_button_value(self):
-        for y in range(0, 10, 1):
-            for x in range(0, 10, 1):
-                gid = 100 + (y * 10) + x
-                self.pc.button(gid).setText(
-                    str(self.test_value[y][x]))
-
-    def center(self):
-        qr = self.frameGeometry()
-        cp = qtw.QDesktopWidget().availableGeometry().center()
-        qr.moveCenter(cp)
-        self.move(qr.topLeft())
 
     def paintEvent(self, event):
         qp = qtg.QPainter()
@@ -189,19 +194,37 @@ class Combat(qtw.QWidget):
             if height == 0:
                 height = 45
                 if width > 0:
-                    qp.drawRect(pos1[0] + 45, pos1[1] + 80, width + 65,
+                    qp.drawRect(pos1[0] + 55, pos1[1] + 85, width + 65,
                                 height)
                 else:
-                    qp.drawRect(pos1[0] + 110, pos1[1] + 80, width - 65,
+                    qp.drawRect(pos1[0] + 120, pos1[1] + 85, width - 65,
                                 height)
             elif width == 0:
                 width = 60
                 if height > 0:
-                    qp.drawRect(pos1[0] + 47, pos1[1] + 80, width, height +
+                    qp.drawRect(pos1[0] + 55, pos1[1] + 85, width, height +
                                 45)
                 else:
-                    qp.drawRect(pos1[0] + 47, pos1[1] + 125, width, height -
+                    qp.drawRect(pos1[0] + 55, pos1[1] + 133, width, height -
                                 45)
+
+    def setup_to_combat(self):
+        for button_id in range(100, 200, 1):
+            button = self.setup_obj.player_group.button(button_id)
+            button.setEnabled(False)
+
+    def play_a_turn(self):
+        hit_list = self.pc.make_hit_list(self.pc.get_salvo_limit())
+        for i in hit_list:
+            fire_salvo(self.setup_obj.player, i, self.pc)
+        self.update_combat_interface()
+
+    def update_combat_interface(self):
+        update_interface_gird_values_combat(self.setup_obj.player_group,
+                                            self.setup_obj.player.grid)
+
+        update_interface_gird_values_combat(self.pc_tracking_grid,
+                                        self.setup_obj.player.tracking_grid)
 
 
 class Setup(qtw.QWidget):
@@ -272,7 +295,7 @@ class Setup(qtw.QWidget):
         add_horizontal_coordinates_label(self.main_layout, 1, 1)
         add_vertical_coordinates_label(self.main_layout, 2, 0)
 
-        update_interface_gird_values(self, self.player.grid, False)
+        update_interface_gird_values_setup(self, self.player.grid, False)
         self.center()
         self.setWindowTitle("BattleShip!")
 
@@ -312,7 +335,7 @@ class Setup(qtw.QWidget):
             self.console_label.setText(str(print_loc))
             self.console_label.setStyleSheet("background-color: #00ffa5")
 
-        update_interface_gird_values(self, self.player.grid, False)
+        update_interface_gird_values_setup(self, self.player.grid, False)
         self.update()
 
     def get_end_loc(self, selected_button, ship):
@@ -348,12 +371,11 @@ class Setup(qtw.QWidget):
         self.player = Player('Player')
         self.anchor_point = []
         self.end_loc = []
-        self.ship_rect = []
         self.ship_rect_obj = []
         self.update()
         self.console_label.setText('Board was reset')
         self.console_label.setStyleSheet("background-color: #00ffa5")
-        update_interface_gird_values(self, self.player.grid, True)
+        update_interface_gird_values_setup(self, self.player.grid, True)
 
     def paintEvent(self, event):
         qp = qtg.QPainter()
@@ -389,9 +411,21 @@ class Setup(qtw.QWidget):
 
     def setup_done(self):
         global combat
-        combat = Combat(self)
-        self.hide()
-        combat.show()
+
+        all_ships_placed = True
+        for i in self.player.my_ships:
+            if not i.location:
+                all_ships_placed = False
+
+        if all_ships_placed:
+            combat = Combat(self)
+            self.hide()
+            combat.show()
+        else:
+            msg_box = qtw.QMessageBox()
+            msg_box.setIcon(qtw.QMessageBox.Warning)
+            msg_box.setText('You need to place all ships')
+            msg_box.exec()
 
     def center(self):
         qr = self.frameGeometry()

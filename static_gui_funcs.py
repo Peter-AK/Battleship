@@ -6,7 +6,32 @@ from PyQt5 import QtGui as qtg
 from PyQt5 import QtCore as qtc
 
 
-def update_interface_gird_values(obj, grid, rest):
+def update_interface_gird_values_combat(group, grid):
+    for button_id in range(100, 200, 1):
+        button_str = str(button_id)
+        y = int(button_str[1])
+        x = int(button_str[2])
+
+        group.button(button_id).setStyleSheet(
+            "background-color: #72bcd4")
+        group.button(button_id).setText(
+            str(grid[y][x]))
+
+        group.button(button_id).setCheckable(False)
+        if grid[y][x] == 1:
+            group.button(button_id).setStyleSheet(
+                "background-color: #808080")
+        elif grid[y][x] == 0:
+            group.button(button_id).setStyleSheet(
+                "background-color: red")
+        elif grid[y][x] == 7:
+            group.button(button_id).setStyleSheet(
+                "background-color: #e6ae17")
+        elif grid[y][x] == 555:
+            group.button(button_id).setCheckable(True)
+
+
+def update_interface_gird_values_setup(obj, grid, rest):
     for button_id in range(100, 200, 1):
         button_str = str(button_id)
         y = int(button_str[1])
@@ -22,7 +47,7 @@ def update_interface_gird_values(obj, grid, rest):
                 "background-color: #808080")
         elif grid[y][x] == 555 and rest is True:
             obj.player_group.button(button_id).setStyleSheet(
-                "background-color: None")
+                "background-color: #72bcd4")
         anchor_update(obj, button_id)
         end_loc_update(obj, button_id)
 
@@ -166,3 +191,27 @@ def add_rect(obj, anchor_point_obj, end_point_obj):
 
     obj.ship_rect.append([pos1, pos2])
     obj.update()
+
+
+def fire_salvo(obj, location, track_obj):
+    """
+    Fires a single salvo, checks if it was a hit or miss. Makes the
+    modifications necessary in both player and pc gird.
+    """
+    y = location[0]
+    x = location[1]
+    if obj.grid[y, x] == 1:
+        if obj.name != 'PC':
+            print('Hit!!')
+        track_obj.tracking_grid[y, x] = 0
+        for i in obj.my_ships:
+            for j in i.location:
+                if j[0] == y and j[1] == x:
+                    j[2] = 0
+                    i.in_place(obj.grid)
+
+    else:
+        track_obj.tracking_grid[location[0]][location[1]] = 7
+        obj.grid[location[0]][location[1]] = 7
+        if obj.name != 'PC':
+            print('Miss!!')

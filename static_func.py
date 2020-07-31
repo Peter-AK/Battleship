@@ -45,7 +45,7 @@ def valid_entry(entry):
 def valid_end_entry(end_loc, max_end_points, valid_end_loc):
     while True:
         try:
-            if 1 <= int(end_loc) <= max_end_points:
+            if 0 <= int(end_loc) <= max_end_points:
                 end_loc = valid_end_loc[int(end_loc)]
                 return [True, end_loc]
             else:

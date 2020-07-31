@@ -4,24 +4,14 @@ import random
 
 
 class Pc(Player):
-    def __call__(self, player, *args, **kwargs):
-        """
-        When the player object is called up, it will preform a turn.
-        :param args:
-        :param kwargs:
-        :return: in-place
-        """
-        salvo = get_salvo(self.my_ships)
-        while True:
-            hit_list = self.make_hit_list(salvo)
-            for hit_loc_in_list in hit_list:
-                self.fire_salvo(hit_loc_in_list, player)
-            return
+    def __init__(self, name):
 
-    def set_anchor(self, ship):
+        super().__init__(name)
+        for ship in self.my_ships:
+            self.set_anchor(ship)
+
+    def set_anchor(self, ship, **kwargs):
         """
-        Asks the user for an anchor point and an end point for each
-        ship that has not been placed.
         """
         while True:
             x = random.randint(0, 9)
@@ -34,8 +24,8 @@ class Pc(Player):
 
             valid_end_loc = select_dict(valid_end_loc)[0]
 
-            max_end_points = len(valid_end_loc)
-            end_loc = random.randint(1, max_end_points)
+            max_end_points = len(valid_end_loc) - 1
+            end_loc = random.randint(0, max_end_points)
             end_loc = valid_end_entry(end_loc, max_end_points, valid_end_loc)
             if end_loc[0]:
                 place_ship_on_grid(ship, start_loc, end_loc[1])
