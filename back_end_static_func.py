@@ -14,6 +14,18 @@ def to_dataframe(grid):
     return grid
 
 
+def grid_to_gid(gird_loc):
+    """ grid  """
+    gid = 100 + int(str(gird_loc[0]) + str(gird_loc[1]))
+    return gid
+
+
+def gid_to_grid(gid):
+    button_id = str(gid)
+    button_id = [int(button_id[1]), int(button_id[2])]
+    return button_id
+
+
 def valid_entry(entry):
     """
     Checks if an entry is a valid one.

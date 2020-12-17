@@ -1,22 +1,41 @@
-from static_func import to_alpha_numeric
-
+from back_end_static_func import *
 
 from PyQt5 import QtWidgets as qtw
 from PyQt5 import QtGui as qtg
 from PyQt5 import QtCore as qtc
 
 
+def disable_salvo_selection(group, grid, disable):
+    """Updates interface of a buttongroup with a grid"""
+
+    for button_id in range(100, 200, 1):
+        button_str = str(button_id)
+        y = int(button_str[1])
+        x = int(button_str[2])
+        # Makes the buttons uncheckable to begin with
+        button_is_checked = group.button(button_id).isChecked()
+        free = grid[y][x] == 555
+        if free and not button_is_checked and disable:
+            group.button(button_id).setEnabled(False)
+        elif free:
+            group.button(button_id).setEnabled(True)
+
+
 def update_interface_gird_values_combat(group, grid):
+    """Updates interface of a buttongroup with a grid"""
+
     for button_id in range(100, 200, 1):
         button_str = str(button_id)
         y = int(button_str[1])
         x = int(button_str[2])
 
+        # Sets the default button background and text
         group.button(button_id).setStyleSheet(
             "background-color: #72bcd4")
         group.button(button_id).setText(
             str(grid[y][x]))
 
+        # Makes the buttons uncheckable to begin with
         group.button(button_id).setCheckable(False)
 
         if grid[y][x] == 0:
@@ -29,25 +48,41 @@ def update_interface_gird_values_combat(group, grid):
             group.button(button_id).setEnabled(False)
         elif grid[y][x] == 555:
             group.button(button_id).setCheckable(True)
+        elif grid[y][x] == 1:
+            group.button(button_id).setStyleSheet(
+                "background-color: #808080")
+            group.button(button_id).setEnabled(False)
 
 
 def update_interface_gird_values_setup(obj, grid, rest):
+    """
+    Update the grid interface during the setup phase of the game.
+    """
+    anchor_point = obj.player_group.id(obj.anchor_obj)
+
     for button_id in range(100, 200, 1):
         button_str = str(button_id)
         y = int(button_str[1])
         x = int(button_str[2])
 
+        # Set the color of unused space to sea blue
         obj.player_group.button(button_id).setStyleSheet(
             "background-color: #72bcd4")
-        obj.player_group.button(button_id).setText(
-            str(grid[y][x]))
 
+        # Set the color to gray for used space
         if grid[y][x] == 1:
             obj.player_group.button(button_id).setStyleSheet(
                 "background-color: #808080")
+        # Sets the anchor point to orange
+        elif anchor_point == button_id:
+            obj.player_group.button(button_id).setStyleSheet(
+                "background-color: orange")
+
+        # Reset the color when rest button is pressed.
         elif grid[y][x] == 555 and rest is True:
             obj.player_group.button(button_id).setStyleSheet(
                 "background-color: #72bcd4")
+
         anchor_update(obj, button_id)
         end_loc_update(obj, button_id)
 
@@ -76,18 +111,6 @@ def anchor_update(obj, button_id):
     if loc == gid_to_grid(button_id):
         obj.player_group.button(button_id).setStyleSheet(
             "background-color: #ffa500")
-
-
-def grid_to_gid(gird_loc):
-    """ grid  """
-    gid = 100 + int(str(gird_loc[0]) + str(gird_loc[1]))
-    return gid
-
-
-def gid_to_grid(gid):
-    button_id = str(gid)
-    button_id = [int(button_id[1]), int(button_id[2])]
-    return button_id
 
 
 def add_horizontal_coordinates_label(layout, row, col):
@@ -151,23 +174,6 @@ def add_buttons(layout, ischeckable, group):
         button.setCheckable(ischeckable)
         layout.addWidget(button, *position)
         group.addButton(button, id=gid)
-
-
-def add_ship_buttons(obj, player):
-    """
-    Creates QRadioButtons and adds them to a QButtonGroup then sets them in a
-    respective layout.
-    :param obj: Object that has the button group and layout
-    :param player: player object
-    :return:
-    """
-
-    for ship in player.my_ships:
-        name = ship.name
-        size = ship.size
-        button = qtw.QRadioButton(f"{name} : Size : {size}")
-        obj.ship_layout.addWidget(button)
-        obj.ship_button_group.addButton(button, id=ship.id)
 
 
 def ship_list_reset_text(obj, ships):
